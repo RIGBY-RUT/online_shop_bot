@@ -30,7 +30,7 @@ def auth(message):
     global auth
     auth = 1
     if auth != 0:
-        keyboard = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
+        keyboard = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True, one_time_keyboard=True)
         button_phone = types.KeyboardButton(text="Отправить номер телефона", request_contact=True)
         keyboard.add(button_phone)
         bot.send_message(message.chat.id,
@@ -45,12 +45,21 @@ def restart(message):
 
     #bot.send_message(message.chat.id,
     #                IDuser)
-    if (str(nomer) == "79175312197"): ####and (IDmes) == IDuser####
+    if (str(nomer) == "79175312197"): ####and (IDmes) == IDuser#### тут нужно проверить чей контакт скинул пользователь, свой или рандомного человека
         bot.send_message(message.chat.id,
-                         "Аунтификация прошла успешно, можно перейти к /start",
+                         "Аунтификация прошла успешно",
+                         )
+        bot.send_message(message.chat.id,
+                         "Не забудьте выйти после окончания изменений",
                          )
         global auth
         auth = 0
+        keyboard = types.ReplyKeyboardMarkup(one_time_keyboard=True)
+        button1 = types.KeyboardButton(text="/start")
+        keyboard.add(button1)
+        bot.send_message(message.chat.id,
+                         "Можно перейти к меню",
+                         reply_markup=keyboard)
     else:
         bot.send_message(message.chat.id,
                          "Обратитесь к администратору",
@@ -66,7 +75,8 @@ def text(message):
     button1 = types.KeyboardButton(text='Изменить')
     button2 = types.KeyboardButton(text='Добавить')
     button3 = types.KeyboardButton(text='Удалить')
-    keyboard.add(button1, button2, button3)
+    button4 = types.KeyboardButton(text='Выход')
+    keyboard.add(button1, button2, button3, button4)
     bot.send_message(message.chat.id,
                      "Что нужно сделать с товаром?",
                      reply_markup=keyboard)
@@ -75,6 +85,13 @@ def text(message):
 @bot.message_handler(func=lambda item: item.text == 'Изменить', content_types=['text'])
 def change(message):
     if auth == 0:
+
+
+
+
+
+
+
         pass
     else:
         bot.send_message(message.chat.id,"Пожалуйста, авторизуйтесь (/auth)")
@@ -82,6 +99,13 @@ def change(message):
 @bot.message_handler(func=lambda item: item.text == 'Добавить', content_types=['text'])
 def add(message):
     if auth == 0:
+
+
+
+
+
+
+
         pass
     else:
         bot.send_message(message.chat.id,"Пожалуйста, авторизуйтесь (/auth)")
@@ -89,13 +113,23 @@ def add(message):
 @bot.message_handler(func=lambda item: item.text == 'Удалить', content_types=['text'])
 def dell(message):
     if auth == 0:
+
+
+
+
+
+
+
         pass
     else:
         bot.send_message(message.chat.id,"Пожалуйста, авторизуйтесь (/auth)")
 
-
-
-
+#Exet
+@bot.message_handler(func=lambda item: item.text == 'Выход', content_types=['text'])
+def dell(message):
+    global auth
+    auth = 1
+    bot.send_message(message.chat.id, "Вы успешно вышли!")
 
 
 @bot.message_handler(content_types=['text'])
