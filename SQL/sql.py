@@ -33,7 +33,7 @@ def geophone(message):
         button_phone = types.KeyboardButton(text="Отправить номер телефона", request_contact=True)
         keyboard.add(button_phone)
         bot.send_message(message.chat.id,
-                        "Отправе нам свой текущиё номер телефона для аунтификации",
+                        "Отправе нам свой текущий номер телефона для аунтификации",
                         reply_markup=keyboard)
         if str(message.text) == "89995252655":
             bot.send_message(message.chat.id,
