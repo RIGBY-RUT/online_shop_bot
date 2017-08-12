@@ -2,7 +2,7 @@ import sqlite3
 import logging
 import telebot
 import const
-global auth
+global auth, flag
 
 
 from telebot import types
@@ -47,19 +47,14 @@ def restart(message):
     #                IDuser)
     if (str(nomer) == "79175312197"): ####and (IDmes) == IDuser#### тут нужно проверить чей контакт скинул пользователь, свой или рандомного человека
         bot.send_message(message.chat.id,
-                         "Аунтификация прошла успешно",
+                         "Аунтификация прошла успешно, можно перейти к меню (/start)",
                          )
         bot.send_message(message.chat.id,
                          "Не забудьте выйти после окончания изменений",
                          )
         global auth
         auth = 0
-        keyboard = types.ReplyKeyboardMarkup(one_time_keyboard=True)
-        button1 = types.KeyboardButton(text="/start")
-        keyboard.add(button1)
-        bot.send_message(message.chat.id,
-                         "Можно перейти к меню",
-                         reply_markup=keyboard)
+
     else:
         bot.send_message(message.chat.id,
                          "Обратитесь к администратору",
@@ -85,7 +80,8 @@ def text(message):
 @bot.message_handler(func=lambda item: item.text == 'Изменить', content_types=['text'])
 def change(message):
     if auth == 0:
-
+        global flag
+        flag = "izm"
 
 
 
@@ -99,7 +95,8 @@ def change(message):
 @bot.message_handler(func=lambda item: item.text == 'Добавить', content_types=['text'])
 def add(message):
     if auth == 0:
-
+        global flag
+        flag = "dob"
 
 
 
@@ -113,8 +110,8 @@ def add(message):
 @bot.message_handler(func=lambda item: item.text == 'Удалить', content_types=['text'])
 def dell(message):
     if auth == 0:
-
-
+        global flag
+        flag = "uda"
 
 
 
@@ -134,6 +131,8 @@ def dell(message):
 
 @bot.message_handler(content_types=['text'])
 def restart(message):
+    global flag
+    if flag = 
     bot.send_message(chat_id=message.chat.id, text='Выберите пункт меню или введите корректный запрос')
 
 if __name__ == '__main__':
