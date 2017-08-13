@@ -82,6 +82,24 @@ def change(message):
     if auth == 0:
         global flag
         flag = "izm"
+        bot.send_message(message.chat.id,
+                         "В списке товаров присутствуют:")
+
+        conn = sqlite3.connect(const.adr_con)
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT name FROM products")
+        results = cursor.fetchall()
+
+        print(results)
+        kolich = len(results)
+        for kolich in range(len(results)):
+            name = str(results[kolich])
+            bot.send_message(message.chat.id,
+                             name[2:-3])
+        conn.close()
+        bot.send_message(message.chat.id,
+                         "Напишите боту какое наименование вы хотите редактиповать")
 
 
 
@@ -97,6 +115,7 @@ def add(message):
     if auth == 0:
         global flag
         flag = "dob"
+
 
 
 
@@ -132,8 +151,36 @@ def dell(message):
 @bot.message_handler(content_types=['text'])
 def restart(message):
     global flag
-    if flag = 
-    bot.send_message(chat_id=message.chat.id, text='Выберите пункт меню или введите корректный запрос')
+    if flag != "izm" or "dob" or "uda":
+        bot.send_message(chat_id=message.chat.id, text='Выберите пункт меню или введите корректный запрос')
 
+    elif flag == "izm":
+        conn = sqlite3.connect(const.adr_con)
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT name FROM products")
+        results = cursor.fetchall()
+
+        print(results)
+        kolich = len(results)
+        for kolich in range(len(results)):
+            name = str(results[kolich])
+            results.index = (name[2:-3])
+            print(results.index)
+
+
+
+        conn.close()
+
+        pass
+    elif flag == "dob":
+        pass
+    elif flag == "uda":
+        pass
+
+
+
+    else:
+        pass
 if __name__ == '__main__':
     bot.polling(none_stop=True)
