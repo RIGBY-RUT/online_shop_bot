@@ -2,8 +2,9 @@ import sqlite3
 import logging
 import telebot
 import const
-global auth, flag
-
+global auth, flag, prod
+prod = 0
+flag = "nothing"
 
 from telebot import types
 #tg_conn
@@ -34,7 +35,7 @@ def auth(message):
         button_phone = types.KeyboardButton(text="Отправить номер телефона", request_contact=True)
         keyboard.add(button_phone)
         bot.send_message(message.chat.id,
-                        "Отправте нам свой текущиё номер телефона для аунтификации",
+                        "Отправьте нам свой текущий номер телефона для аунтификации",
                         reply_markup=keyboard)
 
 @bot.message_handler(content_types=['contact'])
@@ -45,7 +46,7 @@ def restart(message):
 
     #bot.send_message(message.chat.id,
     #                IDuser)
-    if (str(nomer) == "79175312197"): ####and (IDmes) == IDuser#### тут нужно проверить чей контакт скинул пользователь, свой или рандомного человека
+    if (str(nomer) == str("+79251296901") or str("+79175312197") or str("+79850752856")): ####and (IDmes) == IDuser#### тут нужно проверить чей контакт скинул пользователь, свой или рандомного человека
         bot.send_message(message.chat.id,
                          "Аунтификация прошла успешно, можно перейти к меню (/start)",
                          )
@@ -66,7 +67,7 @@ def restart(message):
 
 @bot.message_handler(commands=["start"])
 def text(message):
-    keyboard = types.ReplyKeyboardMarkup(row_width=1, one_time_keyboard=True)
+    keyboard = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True, one_time_keyboard=True)
     button1 = types.KeyboardButton(text='Изменить')
     button2 = types.KeyboardButton(text='Добавить')
     button3 = types.KeyboardButton(text='Удалить')
@@ -91,7 +92,6 @@ def change(message):
         cursor.execute("SELECT name FROM products")
         results = cursor.fetchall()
 
-        print(results)
         kolich = len(results)
         for kolich in range(len(results)):
             name = str(results[kolich])
@@ -148,13 +148,104 @@ def dell(message):
     bot.send_message(message.chat.id, "Вы успешно вышли!")
 
 
+@bot.message_handler(func=lambda item: item.text == 'Название товара', content_types=['text'])
+def change(message):
+    global prod, flag
+    flag = "c_name"
+    bot.send_message(message.chat.id,
+                     "Текущее назвние: " + prod + "\nОтправьте боту новое название.")
+
+
+
+
+
+
+
+@bot.message_handler(func=lambda item: item.text == 'Количество единиц товара', content_types=['text'])
+def change(message):
+    global prod
+
+
+@bot.message_handler(func=lambda item: item.text == 'Количество единиц товара в предзаказе', content_types=['text'])
+def change(message):
+    global prod
+
+
+@bot.message_handler(func=lambda item: item.text == 'Изображение товара', content_types=['text'])
+def change(message):
+    global prod
+
+
+
+
 @bot.message_handler(content_types=['text'])
 def restart(message):
-    global flag
-    if flag != "izm" or "dob" or "uda":
-        bot.send_message(chat_id=message.chat.id, text='Выберите пункт меню или введите корректный запрос')
+    global flag, prod
+    #if flag != ("izm" or "dob" or "uda"):
+     #   #print (flag)
+     #   bot.send_message(chat_id=message.chat.id, text='Выберите пункт меню или введите корректный запрос')
 
-    elif flag == "izm":
+    if flag == "izm":
+        finder = 0
+        prod = message.text
+        conn = sqlite3.connect(const.adr_con)
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT name FROM products ")
+        results = cursor.fetchall()
+
+        print(results)
+        kolich = results
+        conn.close()
+        for kolich in results:
+            name = str(kolich)
+            print (name[2:-3])
+            print (prod)
+            if str(name[2:-3]) == str(prod):
+                bot.send_message(chat_id=message.chat.id, text="Веденное значение найдено")
+                finder = 1
+
+
+                #выделение строки с выбранным товаром
+
+                prod = message.text
+                conn = sqlite3.connect(const.adr_con)
+                cursor = conn.cursor()
+
+                cursor.execute("""SELECT num, name, quantity, pre_order, Image_title
+                                FROM products
+                                WHERE name = '""" + prod +"'")
+                results = cursor.fetchall()
+                print (results)
+                for rec in results:
+                    num, name, quantity, pre_order, Image_title = rec
+                    #print (num, name, quantity, pre_order, Image_title)\
+
+                    #### KLAVA DLA IZMENENIYA TABLIC ####
+
+                bot.send_message(chat_id=message.chat.id, text=(" Номер товара: " + str(num) +"\n Название: " + str(name) +"\n В наличии: " + str(quantity) +"\n В предзаказе: " + str(pre_order) +"\n Изображение товара " + str(Image_title)))
+                keyboard = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True, one_time_keyboard=True)
+                с_name = types.KeyboardButton(text="Название товара")
+                с_quantity = types.KeyboardButton(text="Количество единиц товара")
+                c_preorder = types.KeyboardButton(text="Количество единиц товара в предзаказе")
+                c_image = types.KeyboardButton(text="Изображение товара")
+                keyboard.add(с_name, с_quantity, c_preorder, c_image)
+                bot.send_message(message.chat.id,
+                                 "Изменить",
+                                 reply_markup=keyboard)
+
+                conn.close()
+                break
+        conn.close()
+
+
+
+
+    elif flag == "dob":
+        pass
+    elif flag == "uda":
+
+        prod = message.text
         conn = sqlite3.connect(const.adr_con)
         cursor = conn.cursor()
 
@@ -165,22 +256,69 @@ def restart(message):
         kolich = len(results)
         for kolich in range(len(results)):
             name = str(results[kolich])
-            results.index = (name[2:-3])
-            print(results.index)
+            if str(name[2:-3]) == str(prod):
+                print(name[2:-3])
+                print (prod)
+                bot.send_message(chat_id=message.chat.id, text="Веденное значение найдено")
 
 
+                print(results)
+                kolich = len(results)
 
+            else:
+                bot.send_message(chat_id=message.chat.id, text="Введенное значение отсутствует")
+
+    elif flag == "c_name":
+        new_name = message.text
+        conn = sqlite3.connect(const.adr_con)
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT name FROM products ")
+        results = cursor.fetchall()
+        old_name = results
+
+
+        #print(results)
+        cursor.execute("SELECT COUNT(*) FROM `products`")
+        results = cursor.fetchall()
+        kolich = str(results)[2:-3]
+        kolich = int(kolich)
         conn.close()
+        #print(kolich)
 
-        pass
-    elif flag == "dob":
-        pass
-    elif flag == "uda":
-        pass
+        for word in old_name:
+            if int(kolich) > 0:
+                kolich = int(kolich) - 1
+                name = str(old_name[int(kolich)])
+                #print(name[2:-3])
+                #print(new_name)
+                #print(kolich)
+                if str(name[2:-3]) == str(new_name):
+                    bot.send_message(message.chat.id,
+                                     "Hазвние: '" + new_name + "' yже используется.")
+                    break
+                elif int(kolich) == 0:
+                    conn.close()
+                    bot.send_message(message.chat.id,
+                                    "Новое название товара: " + new_name + "\n Для продолжения введите /start")
+                    #print(prod)
+                    conn = sqlite3.connect(const.adr_con)
+                    cursor = conn.cursor()
+
+                    cursor.execute("UPDATE products SET name = '" + str(name[2:-3]) + "' WHERE name = '" + str(new_name) + "';")
+                    conn.commit()
+
+                    conn.close()
+                    flag = "nothing"
+
 
 
 
     else:
-        pass
+        bot.send_message(message.chat.id, "Что это за символы? Я не понимаю вас!")
+
+
+
+
 if __name__ == '__main__':
     bot.polling(none_stop=True)
