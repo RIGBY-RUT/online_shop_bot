@@ -24,7 +24,6 @@ formatter = logging.Formatter("%(asctime)s | %(levelname)-7s | %(message)s")
 fh.setFormatter(formatter)
 logger.addHandler(fh)
 
-
 #auth
 @bot.message_handler(commands=["auth"])
 def auth(message):
@@ -61,8 +60,6 @@ def restart(message):
                          "Обратитесь к администратору",
                          )
 
-
-
 #klava
 
 @bot.message_handler(commands=["start"])
@@ -76,7 +73,6 @@ def text(message):
     bot.send_message(message.chat.id,
                      "Что нужно сделать с товаром?",
                      reply_markup=keyboard)
-
 
 @bot.message_handler(func=lambda item: item.text == 'Изменить', content_types=['text'])
 def change(message):
@@ -147,34 +143,55 @@ def dell(message):
     auth = 1
     bot.send_message(message.chat.id, "Вы успешно вышли!")
 
-
 @bot.message_handler(func=lambda item: item.text == 'Название товара', content_types=['text'])
 def change(message):
-    global prod, flag
-    flag = "c_name"
-    bot.send_message(message.chat.id,
-                     "Текущее назвние: " + prod + "\nОтправьте боту новое название.")
-
-
-
-
-
-
+    if auth == 0:
+        global prod, flag
+        flag = "c_name"
+        bot.send_message(message.chat.id,
+                         "Текущее назвние: " + prod + "\nОтправьте боту новое название.")
+        pass
+    else:
+        bot.send_message(message.chat.id,"Пожалуйста, авторизуйтесь (/auth)")
 
 @bot.message_handler(func=lambda item: item.text == 'Количество единиц товара', content_types=['text'])
 def change(message):
-    global prod
-
+    if auth == 0:
+        global flag
+        flag = "c_quantity"
+        bot.send_message(message.chat.id,
+                        "Отправьте боту актуальное количество единиц товара.")
+        pass
+    else:
+        bot.send_message(message.chat.id,"Пожалуйста, авторизуйтесь (/auth)")
 
 @bot.message_handler(func=lambda item: item.text == 'Количество единиц товара в предзаказе', content_types=['text'])
 def change(message):
-    global prod
+    if auth == 0:
+        global prod, flag
+        flag = "c_preorder"
+        bot.send_message(message.chat.id,
+                         "Отправьте боту актуальное количество единиц товара в предзаказе")
+        pass
+    else:
+        bot.send_message(message.chat.id,"Пожалуйста, авторизуйтесь (/auth)")
 
 
 @bot.message_handler(func=lambda item: item.text == 'Изображение товара', content_types=['text'])
 def change(message):
-    global prod
+    if auth == 0:
+        global prod, flag
+        flag = "c_image"
+        bot.send_message(message.chat.id,
+                         "Отправьте боту новое изображение товара")
+        pass
+    else:
+        bot.send_message(message.chat.id,"Пожалуйста, авторизуйтесь (/auth)")
 
+
+@bot.message_handler(content_types=['photo'])
+def change(message):
+    print("ahvabonga")
 
 
 
@@ -238,9 +255,6 @@ def restart(message):
                 break
         conn.close()
 
-
-
-
     elif flag == "dob":
         pass
     elif flag == "uda":
@@ -277,12 +291,12 @@ def restart(message):
         results = cursor.fetchall()
         old_name = results
 
-
         #print(results)
         cursor.execute("SELECT COUNT(*) FROM `products`")
         results = cursor.fetchall()
         kolich = str(results)[2:-3]
         kolich = int(kolich)
+        conn.close()
         conn.close()
         #print(kolich)
 
@@ -305,20 +319,58 @@ def restart(message):
                     conn = sqlite3.connect(const.adr_con)
                     cursor = conn.cursor()
 
-                    cursor.execute("UPDATE products SET name = '" + str(name[2:-3]) + "' WHERE name = '" + str(new_name) + "';")
+                    cursor.execute("UPDATE products SET name = '" + str(new_name) + "' WHERE name = '" + str(prod) + "';")
+
                     conn.commit()
 
                     conn.close()
                     flag = "nothing"
 
+    elif flag == "c_quantity":
+        enter_num = message.text
 
+        def isfloat(value):
+            try:
+                float(value)
+                return True
+            except ValueError:
+                return False
+        if isfloat(enter_num):
+            print('это число')
+            conn = sqlite3.connect(const.adr_con)
+            cursor = conn.cursor()
+            cursor.execute("UPDATE products SET quantity = '" + str(enter_num) + "' WHERE name = '" + str(prod) + "';")
+            conn.commit()
+            conn.close()
+            bot.send_message(message.chat.id, "Количество товара '"+str(prod)+"' = "+str(enter_num)+"\n /start")
+            flag = "nothing"
+        else:
+            bot.send_message(message.chat.id, 'Это не число')
 
+    elif flag == "c_preorder":
+        enter_num = message.text
+
+        def isfloat(value):
+            try:
+                float(value)
+                return True
+            except ValueError:
+                return False
+
+        if isfloat(enter_num):
+            print('это число')
+            conn = sqlite3.connect(const.adr_con)
+            cursor = conn.cursor()
+            cursor.execute("UPDATE products SET pre_order = '" + str(enter_num) + "' WHERE name = '" + str(prod) + "';")
+            conn.commit()
+            conn.close()
+            bot.send_message(message.chat.id, "Количество товара в предзаказе '" + str(prod) + "' = " + str(enter_num) + "\n /start")
+            flag = "nothing"
+        else:
+            bot.send_message(message.chat.id, 'Это не число')
 
     else:
         bot.send_message(message.chat.id, "Что это за символы? Я не понимаю вас!")
-
-
-
 
 if __name__ == '__main__':
     bot.polling(none_stop=True)
